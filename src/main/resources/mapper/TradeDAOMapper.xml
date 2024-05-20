@@ -1,0 +1,19 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fruitmarket.trade.dao.TradeDAOImpl">
+    <insert id="makeTrade"
+            parameterType="com.fruitmarket.trade.vo.TradeVO">
+        INSERT INTO TRADE
+        VALUES
+             ( 'TD-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' || LPAD(SEQ_TRADE_PK.NEXTVAL, 6, '0')
+             , #{userId}
+             , #{fruitId}
+             , #{quantity}
+             , #{price}
+             , #{tradePosition}
+             , SYSDATE
+        )
+    </insert>
+</mapper>

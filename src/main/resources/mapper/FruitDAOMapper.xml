@@ -1,0 +1,25 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fruitmarket.fruit.dao.FruitDAOImpl">
+    <select id="getAllFruits"
+            resultType="com.fruitmarket.fruit.vo.FruitVO">
+        SELECT FRUIT_ID
+             , FRUIT_NAME
+             , PRICE
+             , STOCK
+          FROM FRUIT
+    </select>
+
+    <select id="getFruitVOById"
+            parameterType="string"
+            resultType="com.fruitmarket.fruit.vo.FruitVO">
+        SELECT FRUIT_ID
+             , FRUIT_NAME
+             , PRICE
+             , STOCK
+          FROM FRUIT
+         WHERE FRUIT_ID = #{_parameter}
+    </select>
+</mapper>

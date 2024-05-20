@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table>
+    <thead>
+        <tr>
+            <td>id</td>
+            <td>이름</td>
+            <td>가격</td>
+            <td>재고</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="f:${fruits}">
+            <td th:text="${f.fruitId}"></td>
+            <td th:text="${f.fruitName}"></td>
+            <td th:text="${f.price}"></td>
+            <td th:text="${f.stock}"></td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

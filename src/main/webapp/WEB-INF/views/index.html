@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="jslib/jquery-3.7.1.min.js"></script>
+    <script>
+        $().ready(function () {
+            $("#doBuy").css("display", "none");
+            $("#doSell").css("display", "none");
+            $(".order-buy").click(function() {
+                let fruitId = $(this).data("id");
+                $.get("/fruit/"+fruitId, function (response) {
+                    let fruit = response.result
+                    $("#order-fruitName").text(fruit.fruitName);
+                    $("#order-price").text(fruit.price);
+                    $("#doBuy").css("display", "block");
+                    $("#doSell").css("display", "none");
+                })
+            })
+            $(".order-sell").click(function() {
+                let fruitId = $(this).data("id");
+                $.get("/fruit/"+fruitId, function (response) {
+                    let fruit = response.result
+                    $("#order-fruitName").text(fruit.fruitName);
+                    $("#order-price").text(fruit.price);
+                    $("#doBuy").css("display", "none");
+                    $("#doSell").css("display", "block");
+                })
+            })
+
+        })
+    </script>
+</head>
+<body>
+<div id="navbar">
+    <a th:if="${session._LOGIN_USER_== null}" href="/regist">회원가입</a>
+    <a th:unless="${session._LOGIN_USER_ == null}" href="/logout">로그아웃</a>
+</div>
+<div id="container">
+    <div id="l-top">
+        <table>
+            <thead>
+            <tr>
+                <td>id</td>
+                <td>이름</td>
+                <td>가격</td>
+                <td>재고</td>
+                <td>주문</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="f:${fruits}">
+                <td th:text="${f.fruitId}"></td>
+                <td th:text="${f.fruitName}"></td>
+                <td th:text="${f.price}"></td>
+                <td th:text="${f.stock}"></td>
+                <td><button class="order-buy" th:data-id="${f.fruitId}">주문</button></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="r-top">
+        <div id="order-card">
+            <p id="order-fruitName">품목</p>
+            <p id="order-quantity">수량</p>
+            <p id="order-price">가격</p>
+            <p>총액</p>
+        </div>
+        <button id="doBuy">구매하기</button>
+        <button id="doSell">판매하기</button>
+    </div>
+
+    <div id="l-bot">
+        <canvas id="myChart"></canvas>
+        <script src="js/mychart.js"></script>
+    </div>
+
+    <div id="r-bot">
+        <div th:if="${session._LOGIN_USER_ != null}">
+            <p>hello</p>
+            <p>userId:<span th:text="${session._LOGIN_USER_.userId}"></span></p>
+            <p>잔고:<span th:text="${session._LOGIN_USER_.balance}"></span></p>
+            <table>
+                <thead>
+                    <tr>
+                        <td>바구니id</td>
+                        <td>사용자id</td>
+                        <td>과일id</td>
+                        <td>수량</td>
+                        <td>가격</td>
+                        <td>주문</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="b:${userBasket}">
+                        <td th:text="${b.basketId}"></td>
+                        <td th:text="${b.userId}"></td>
+                        <td th:text="${b.fruitId}"></td>
+                        <td th:text="${b.quantity}"></td>
+                        <td th:text="${b.price}"></td>
+                        <td><button class="order-sell" th:data-id="${b.fruitId}">판매</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:unless="${session._LOGIN_USER_ != null}">
+            <form action="/login" th:object="${userinfoVO}" method="post">
+                <input type="text" th:field="*{userId}" />
+                <input type="password" th:field="*{password}" autocomplete="false" />
+                <input type="submit">
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
