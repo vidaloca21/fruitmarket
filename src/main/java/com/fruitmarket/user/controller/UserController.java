@@ -17,7 +17,10 @@ public class UserController {
     private UserinfoService userinfoService;
 
     @GetMapping("/regist")
-    public String regist(Model model) {
+    public String regist(Model model, HttpSession session) {
+        if (session.getAttribute("_LOGIN_USER_") != null) {
+            session.invalidate();
+        }
         model.addAttribute("userinfoVO", new UserinfoVO());
         return "regist";
     }
@@ -26,10 +29,19 @@ public class UserController {
     public String doregist(@ModelAttribute("userinfoVO") UserinfoVO userinfo) {
         int isSuccess = userinfoService.regist(userinfo);
         if (isSuccess == 1) {
-            return "redirect://";
+            return "redirect:/";
         } else {
             return "regist";
         }
+    }
+
+    @GetMapping("/login")
+    public String login(Model model, HttpSession session) {
+        if (session.getAttribute("_LOGIN_USER_") != null) {
+            session.invalidate();
+        }
+        model.addAttribute("userinfoVO", new UserinfoVO());
+        return "login";
     }
 
     @PostMapping("/login")

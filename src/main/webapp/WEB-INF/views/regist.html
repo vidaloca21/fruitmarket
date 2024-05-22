@@ -3,15 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        body {
+            background-color: #FFF8DC;
+        }
+        #regist-card {
+            width: 300px;
+            height: 400px;
+            padding: 20px;
+            background-color: #FFF;
+            margin: 200px auto 0 auto;
+            justify-content: center;
+            align-items: center;
+        }
+        input[type=text],
+        input[type=password],
+        input[type=number] {
+            width: 290px;
+            height: 36px;
+            border-radius: 5px;
+            font-size: 16px;
+            padding-left: 4px;
+            margin-bottom: 20px;
+        }
+        input[type=submit] {
+            width: 300px;
+            height: 36px;
+            border: 1px solid #FFD23F;
+            border-radius: 5px;
+            background-color: #FFD23F;
+            color: #F7FAF3;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        label {
+        }
+    </style>
 </head>
 <body>
-
 <form action="/regist" th:object="${userinfoVO}" method="post">
-    <input type="text" th:field="*{userId}" />
-    <input type="password" th:field="*{password}" />
-    <input type="text" th:field="*{userRole}" />
-    <input type="number" th:field="*{balance}" />
-    <input type="submit">
+    <div id="regist-card">
+        <label for="userId">ID</label>
+        <input type="text" th:field="*{userId}" name="userId" id="userId" />
+        <label for="password">비밀번호</label>
+        <input type="password" th:field="*{password}" name="password" id="password" />
+        <label for="userRole">등급</label>
+        <input type="text" th:field="*{userRole}" name="userRole" id="userRole" />
+        <label for="balance">잔고</label>
+        <input type="number" th:field="*{balance}" name="balance" id="balance" />
+        <input type="submit" value="회원가입">
+    </div>
 </form>
 
 </body>

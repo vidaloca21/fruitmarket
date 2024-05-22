@@ -7,8 +7,9 @@
             resultType="com.fruitmarket.fruit.vo.FruitVO">
         SELECT FRUIT_ID
              , FRUIT_NAME
-             , PRICE
+             , MARKET_CAP
              , STOCK
+             , ROUND(MARKET_CAP / STOCK, -2) "CURRENT_PRICE"
           FROM FRUIT
     </select>
 
@@ -17,8 +18,9 @@
             resultType="com.fruitmarket.fruit.vo.FruitVO">
         SELECT FRUIT_ID
              , FRUIT_NAME
-             , PRICE
+             , MARKET_CAP
              , STOCK
+             , ROUND(MARKET_CAP / STOCK, -2) "CURRENT_PRICE"
           FROM FRUIT
          WHERE FRUIT_ID = #{_parameter}
     </select>

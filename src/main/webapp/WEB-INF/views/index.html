@@ -6,41 +6,98 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="jslib/jquery-3.7.1.min.js"></script>
-    <script>
+    <script src="jslib/sockjs.min.js"></script>
+    <script src="js/socket.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const USER_ID = [[${session._LOGIN_USER_.userId}]];
+        /*]]>*/
         $().ready(function () {
-            $("#doBuy").css("display", "none");
-            $("#doSell").css("display", "none");
             $(".order-buy").click(function() {
                 let fruitId = $(this).data("id");
                 $.get("/fruit/"+fruitId, function (response) {
                     let fruit = response.result
                     $("#order-fruitName").text(fruit.fruitName);
-                    $("#order-price").text(fruit.price);
+                    $("#frmFruitId").val(fruit.fruitId);
+                    $("#frmTradePosition").val("BUY");
+                    $("#frmTradeQuantity").val(1);
+                    $("#frmTradePrice").val(fruit.currentPrice);
+
                     $("#doBuy").css("display", "block");
                     $("#doSell").css("display", "none");
                 })
+            })
+            $("#btn-plus").click(function () {
+            })
+            $("#btn-minus").click(function () {
+            })
+            $("#doBuy").click(function () {
+                $("#doTrade").submit();
             })
             $(".order-sell").click(function() {
                 let fruitId = $(this).data("id");
                 $.get("/fruit/"+fruitId, function (response) {
                     let fruit = response.result
                     $("#order-fruitName").text(fruit.fruitName);
-                    $("#order-price").text(fruit.price);
+                    $("#frmFruitId").val(fruit.fruitId);
+                    $("#frmTradePosition").val("SELL");
+                    $("#frmTradeQuantity").val(1);
+                    $("#frmTradePrice").val(fruit.currentPrice);
+
                     $("#doBuy").css("display", "none");
                     $("#doSell").css("display", "block");
                 })
             })
+
+
+            /* chat */
+            var chatSend = undefined;
+
+            $("#sendBtn").click(function() {
+                var message = $("#chatMessage").val();
+                $("#chatMessage").val("");
+
+                chatSend({
+                    roomName: "testSocket",
+                    sendType: "all",
+                    message: message
+                })
+            });
+
+
+            chatSend = connectSocket(USER_ID
+                , function(content) {
+                    var chatBox = $(".chat-box");
+
+                    var message = "<div>" + content.message + "</div>";
+                    message = message.replaceAll("↵", "<br/>").replaceAll("\n", "<br/>");
+
+                    var isMe = content.sendToMe == true;
+                    if ( !isMe ) {
+                        message = '<div style="width:50px; margin-right: 3px;">' + content.userId + '</div>' + message;
+                    }
+
+                    chatBox.append('<div class=' + isMe + '>' + message + '</div>');
+                    chatBox.scrollTop(99999999999999999999999);
+                });
+            /* //chat */
 
         })
     </script>
 </head>
 <body>
 <div id="navbar">
-    <a th:if="${session._LOGIN_USER_== null}" href="/regist">회원가입</a>
-    <a th:unless="${session._LOGIN_USER_ == null}" href="/logout">로그아웃</a>
+    <a href="/logout">로그아웃</a>
+    <!-- chat -->
+    <div>
+        <input type="text" id="chatMessage" />
+        <button id="sendBtn">전송</button>
+    </div>
+    <div class="chat-box"></div>
+    <!-- //chat -->
 </div>
 <div id="container">
-    <div id="l-top">
+    <div id="l-top" class="content-wrapper">
         <table>
             <thead>
             <tr>
@@ -55,7 +112,7 @@
             <tr th:each="f:${fruits}">
                 <td th:text="${f.fruitId}"></td>
                 <td th:text="${f.fruitName}"></td>
-                <td th:text="${f.price}"></td>
+                <td th:text="${f.currentPrice}"></td>
                 <td th:text="${f.stock}"></td>
                 <td><button class="order-buy" th:data-id="${f.fruitId}">주문</button></td>
             </tr>
@@ -63,56 +120,58 @@
         </table>
     </div>
 
-    <div id="r-top">
+    <div id="r-top" class="content-wrapper">
         <div id="order-card">
             <p id="order-fruitName">품목</p>
-            <p id="order-quantity">수량</p>
-            <p id="order-price">가격</p>
-            <p>총액</p>
+            <form action="/doTrade" method="post" id="doTrade">
+                <input type="hidden" name="userId" th:value="${session._LOGIN_USER_.userId}" />
+                <input type="hidden" name="fruitId" id="frmFruitId" value="" />
+                <input type="hidden" name="tradePosition" id="frmTradePosition" value="" />
+                <input type="number" name="quantity" id="frmTradeQuantity" value="1" />
+                <input type="number" name="price" id="frmTradePrice" value="" />
+            </form>
+            <button id="btn-plus">+</button>
+            <button id="btn-minus">-</button>
         </div>
         <button id="doBuy">구매하기</button>
         <button id="doSell">판매하기</button>
     </div>
 
-    <div id="l-bot">
+    <div id="l-bot" class="content-wrapper">
         <canvas id="myChart"></canvas>
         <script src="js/mychart.js"></script>
     </div>
 
-    <div id="r-bot">
-        <div th:if="${session._LOGIN_USER_ != null}">
+    <div id="r-bot" class="content-wrapper">
+        <div>
             <p>hello</p>
             <p>userId:<span th:text="${session._LOGIN_USER_.userId}"></span></p>
             <p>잔고:<span th:text="${session._LOGIN_USER_.balance}"></span></p>
             <table>
                 <thead>
                     <tr>
-                        <td>바구니id</td>
+                        <td>거래id</td>
                         <td>사용자id</td>
                         <td>과일id</td>
                         <td>수량</td>
                         <td>가격</td>
-                        <td>주문</td>
+                        <td>구분</td>
+                        <td>일시</td>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="b:${userBasket}">
-                        <td th:text="${b.basketId}"></td>
-                        <td th:text="${b.userId}"></td>
-                        <td th:text="${b.fruitId}"></td>
-                        <td th:text="${b.quantity}"></td>
-                        <td th:text="${b.price}"></td>
-                        <td><button class="order-sell" th:data-id="${b.fruitId}">판매</button></td>
+                    <tr th:each="t :${tradeList}">
+                        <td th:text="${t.tradeId}"></td>
+                        <td th:text="${t.userId}"></td>
+                        <td th:text="${t.fruitId}"></td>
+                        <td th:text="${t.quantity}"></td>
+                        <td th:text="${t.price}"></td>
+                        <td th:text="${t.tradePosition}"></td>
+                        <td th:text="${t.tradeDate}"></td>
+                        <td><button class="order-sell" th:data-id="${t.fruitId}">판매</button></td>
                     </tr>
                 </tbody>
             </table>
-        </div>
-        <div th:unless="${session._LOGIN_USER_ != null}">
-            <form action="/login" th:object="${userinfoVO}" method="post">
-                <input type="text" th:field="*{userId}" />
-                <input type="password" th:field="*{password}" autocomplete="false" />
-                <input type="submit">
-            </form>
         </div>
     </div>
 </div>

@@ -8,6 +8,8 @@ import lombok.Setter;
 public class FruitVO {
     private String fruitId;
     private String fruitName;
-    private int price;
+    private int marketCap;
     private int stock;
+    private int currentPrice;
+
 }
